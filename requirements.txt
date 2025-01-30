@@ -1,0 +1,4 @@
+selenium
+plyer
+python-dotenv
+requests
