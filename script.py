@@ -21,6 +21,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from plyer import notification
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from dotenv import load_dotenv
 import requests
 import random
@@ -32,7 +34,7 @@ PASSWORD = os.getenv("PORTAL_PASSWORD", "")
 URL = "http://smis.medicine.cu.edu.eg:5555/ords/r/fctstu/kasralainy-edu-eg/login"
 
 # Notification settings
-CHECK_INTERVAL = 180  # Time in seconds, PLEASE DO NOT SET THIS BELOW 90, WE DO NOT WANT TO DISTRIBUTE TO MUCH LOAD OR MAKE THIS DETECTED BY THE IT!
+CHECK_INTERVAL = 20  # Time in seconds, PLEASE DO NOT SET THIS BELOW 90, WE DO NOT WANT TO DISTRIBUTE TO MUCH LOAD OR MAKE THIS DETECTED BY THE IT!
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
@@ -45,7 +47,6 @@ TEST_MODE = False  # Set to True for testing, False for normal operation. Use to
 def play_sound():
     try:
         print('\a')
-        os.system('play -nq -t alsa synth 1 sine 440')
     except Exception as e:
         print(f"Error playing sound: {str(e)}")
 
@@ -190,13 +191,15 @@ def main():
 
     # Normal mode with browser
     chrome_options = Options()
-    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--headless')  # Run in headless mode (no GUI)
+    chrome_options.add_argument('--disable-gpu')
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
-    chrome_options.binary_location = '/usr/bin/chromium-browser'
 
     try:
-        driver = webdriver.Chrome(options=chrome_options)
+        print("Initializing browser...")
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
     except WebDriverException as e:
         print(f"Failed to initialize browser driver: {str(e)}")
         return
